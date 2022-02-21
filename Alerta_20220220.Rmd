@@ -66,8 +66,8 @@ head(bc_10)
 
 ```{r}
 # 1234567890123456789012345678901234567890123456789012345678901234567890
-bc <- bc_full[,-1]  
-bc_s <- bc_10[,-1] 
+bc <- bc_full[,-1]   
+bc_s <- bc_10[,-1] # Dataset Pequeño
 # Figura 1. Izq
 #str(bc)
 table(is.na(bc_s))
@@ -98,7 +98,7 @@ bc_s[,10] <- as.character(bc_s[,10])
 table(is.na(bc_s))
 bc_s <- na.omit(bc_s)
 table(is.na(bc_s))
-# se pierden 160 datos
+# se pierden 16 datos
 ```
 
 ```{r echo=FALSE}
@@ -438,7 +438,7 @@ head(prediction)
 #test.set[,31]
 ```
 
-# TABLA 1
+# Información para construir la Tabla 1
 ```{r}
 print("KNN")
 cm_knn$overall[1]
@@ -458,7 +458,7 @@ cm_ann$overall[2]
 cm_ann$byClass
 ```
 
-Tabla 1 Small
+# Tabla 1 Small
 ```{r}
 print("KNN")
 cm_knn_s$overall[1]
@@ -477,8 +477,120 @@ cm_ann_s$overall[1]
 cm_ann_s$overall[2]
 cm_ann_s$byClass
 ```
+# Figura 4. Comparación de medidas de tiempo y exactitud para kNN, SVM y RF
+```{r fig.height=12, fig.width=9}
+#cm_knn
+ #cm_svm
+ #cm_rf
+ 
+ par(mfrow=c(4,3))
+ 
+ #Acc <- c(max(knn_fit_n$results$Accuracy), 
+ #         max(model$results$Accuracy), 
+ #         max(rf_caret_model$results$Accuracy))
+ 
+ #Kappa <- c(max(knn_fit_n$results$Kappa),
+ #           max(model$results$Kappa), 
+ #           max(rf_caret_model$results$Kappa))
 
-# CURVAS ROC
+ times <- c(knn_time, svm_time, rf_time)
+ 
+ color <- c("dodgerblue", "lightskyblue", "cyan")
+ 
+ Acc <- c(cm_knn$overall[1], cm_svm$overall[1], cm_rf$overall[1])
+   
+ Kappa <- c(cm_knn$overall[2], cm_svm$overall[2], cm_rf$overall[2])
+ 
+ Sensib <- c(cm_knn$byClass[1], cm_svm$byClass[1], cm_rf$byClass[1])
+ 
+ Espec <- c(cm_knn$byClass[2], cm_svm$byClass[2], cm_rf$byClass[2])
+ 
+ PPV <- c(cm_knn$byClass[3], cm_svm$byClass[3], cm_rf$byClass[3])
+ 
+ NPV <- c(cm_knn$byClass[4], cm_svm$byClass[4], cm_rf$byClass[4])
+ 
+ F1 <- c(cm_knn$byClass[7], cm_svm$byClass[7], cm_rf$byClass[7])
+   
+ AUC <- c(0.989, 0.996, 0.992)
+ 
+ time_p <- barplot(as.vector(times),names.arg=c("kNN", "SVM", "RF"), 
+                   col = color,ylab=c("Proporcion"), main="Tiempo") 
+                   #,ylim=c(0,70)
+ 
+ text(x = time_p, y = c(times), label = round(times,3), pos = 1, 
+      cex = 0.8, col = "black")
+ 
+ Acc_p <- barplot(Acc, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="Exactitud (Accuracy)")
+ text(x = Acc_p, y = Acc-0.05, label = round(Acc,4), pos = 1, cex = 0.8, col = "black")
+ 
+ K_p <- barplot(Kappa, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="Kappa")
+ text(x = K_p, y = Kappa-0.05, label = round(Kappa,4), pos = 1, cex = 0.8, col = "black")
+ 
+ Sens_p <- barplot(Sensib, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="Sensibilidad")
+ text(x = Sens_p, y = Sensib-0.05, label = round(Sensib,4), pos = 1, cex = 0.8, col = "black")
+ 
+ Espe_p <- barplot(Espec, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="Especificidad")
+ text(x = Espe_p, y = Espec-0.05, label = round(Espec,4), pos = 1, cex = 0.8, col = "black")
+ 
+ PPV_p <- barplot(PPV, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="Valor Predictivo Positivo")
+ text(x = PPV_p, y = PPV-0.05, label = round(PPV,4), pos = 1, cex = 0.8, col = "black")
+ 
+ NPV_p <- barplot(Kappa, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="Valor Predictivo Negativo")
+ text(x = NPV_p, y = NPV-0.05, label = round(NPV,4), pos = 1, cex = 0.8, col = "black")
+ 
+ F1_p <- barplot(F1, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="F1")
+ text(x = F1_p, y = F1-0.05, label = round(F1,4), pos = 1, cex = 0.8, col = "black")
+ 
+ AUC_p <- barplot(AUC, names.arg=c("kNN", "SVM", "RF"), col = color,
+         ylab=c("Proporcion"), main="AUC")
+ text(x = AUC_p, y = AUC, label = round(AUC,4), pos = 1, cex = 0.8, col = "black")
+ 
+ library(pROC)
+ plot.roc(model_knn$pred$obs,
+          model_knn$pred$Malignant,
+          smoothed = TRUE,
+          # arguments for ci
+          ci=TRUE, ci.alpha=0.9, stratified=FALSE,
+          # arguments for plot
+          #plot=TRUE, 
+          auc.polygon=TRUE, 
+          max.auc.polygon=TRUE, grid=TRUE,
+          print.auc=TRUE, show.thres=TRUE, 
+          col="blue", main = "Curva ROC para kNN")
+ 
+ plot.roc(model_svm$pred$obs,
+          model_svm$pred$Malignant,
+          smoothed = TRUE,
+          # arguments for ci
+          ci=TRUE, ci.alpha=0.9, stratified=FALSE,
+          # arguments for plot
+          #plot=TRUE, 
+          auc.polygon=TRUE, 
+          max.auc.polygon=TRUE, grid=TRUE,
+          print.auc=TRUE, show.thres=TRUE,
+          col="blue", main = "Curva ROC para SVM")
+ 
+ plot.roc(model_rf$pred$obs,
+          model_rf$pred$Malignant,
+          smoothed = TRUE,
+          # arguments for ci
+          ci=TRUE, ci.alpha=0.9, stratified=FALSE,
+          # arguments for plot
+          #plot=TRUE, 
+          auc.polygon=TRUE, 
+          max.auc.polygon=TRUE, grid=TRUE,
+          print.auc=TRUE, show.thres=TRUE,
+          col="blue", main = "Curva ROC para RF")
+```
+
+# CURVAS ROC (Small dataset)
 ```{r fig.height=8, fig.width=8}
 library(pROC)
 # "royalblue","dodgerblue", "deepskyblue", "lightskyblue"
@@ -669,7 +781,7 @@ text(x = AUC_p, y = AUC, label = round(AUC,4), pos = 1, cex = 0.8, col = "black"
 print(sessionInfo())
 ```
 
-# Congreso
+# Comparación entre Datasets 
 ```{r}
 str(bc_s)
 head(bc_s, 10)
